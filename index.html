@@ -291,3 +291,576 @@
 
     #photo-strip {
       position: relative;
+      width: 240px;
+      height: 720px;
+      background-color: transparent;
+      overflow: hidden;
+      border-radius: 6px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+    }
+
+    .photo-layer {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 1;
+    }
+
+    .photo-frame {
+      position: absolute;
+      left: 18px;
+      width: 204px;
+      height: 141px;
+      background-color: #000;
+      overflow: hidden;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .photo-frame canvas {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+    }
+
+    #frame-overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: fill;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    #final-result-img {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 20;
+      object-fit: fill;
+      cursor: pointer;
+      display: none;
+    }
+
+    #final-result-img.printing-animation {
+      animation: photoPrintSlide 1.8s cubic-bezier(0.15, 0.85, 0.35, 1) forwards;
+    }
+
+    @keyframes photoPrintSlide {
+      0% { transform: translateY(-100%); opacity: 0.1; filter: brightness(2.5) contrast(0.5); }
+      50% { opacity: 0.7; filter: brightness(1.3) contrast(0.9); }
+      100% { transform: translateY(0); opacity: 1; filter: brightness(1) contrast(1); }
+    }
+
+    /* 左下角炸彈與對話框區域 */
+    .bottom-left-area {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 99999;
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      pointer-events: none;
+    }
+
+    .bottom-left-bomb {
+      width: 100px;
+      height: 100px;
+      flex-shrink: 0;
+    }
+
+    .bottom-left-bomb img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.9));
+    }
+
+    /* 炸彈旁邊的白底對話框 */
+    .bomb-bubble {
+      background: #ffffff;
+      color: #111111;
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-family: 'Montserrat', Arial, sans-serif;
+      font-weight: 800;
+      font-size: 13px;
+      white-space: nowrap;
+      border: 2px solid #111111;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      animation: bubblePulse 2.5s ease-in-out infinite;
+    }
+
+    @keyframes bubblePulse {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    @media (max-width: 650px) {
+      .main-layout { flex-direction: column; align-items: center; }
+      .container { width: 100%; padding: 12px; }
+      .controls-panel { width: 100%; }
+      .bottom-left-area { bottom: 10px; left: 10px; gap: 8px; }
+      .bottom-left-bomb { width: 70px; height: 70px; }
+      .bomb-bubble { font-size: 10px; padding: 5px 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="booth-header">
+      <h1 class="booth-title">BTS Online Photo Booth</h1>
+    </div>
+    
+    <div class="sub-header-title">BTS WORLD TOUR 'ARIRANG' IN KAOHSIUNG</div>
+
+    <div class="main-layout">
+      <div class="controls-panel">
+        <div class="camera-container">
+          <video id="webcam" autoplay playsinline muted></video>
+          <div id="flash-effect"></div>
+          <div id="countdown-overlay"></div>
+          <button id="flip-btn" class="flip-btn" title="切換前後鏡頭">🔄</button>
+        </div>
+
+        <div class="picker-group">
+          <label>🖼️ 1. 請選擇專屬相框：</label>
+          <div class="options-row">
+            <div class="frame-option active" data-frame="JK_ARIRANG" data-slots="4">
+              <img src="JK_ARIRANG.png" alt="JK Arirang">
+            </div>
+            <div class="frame-option" data-frame="JK_BD" data-slots="4">
+              <img src="JK_BD.png" alt="JK BD">
+            </div>
+            <div class="frame-option" data-frame="RM_ARIRANG" data-slots="4">
+              <img src="RM_ARIRANG.png" alt="RM Arirang">
+            </div>
+            <div class="frame-option" data-frame="RM_BD" data-slots="4">
+              <img src="RM_BD.png" alt="RM BD">
+            </div>
+          </div>
+        </div>
+
+        <div class="buttons">
+          <button id="start-btn" class="btn primary">2. 開始拍照 (START)</button>
+          <button id="retake-btn" class="btn secondary" disabled>重新 (RESHOOT)</button>
+        </div>
+
+        <button id="download-btn" class="btn success" disabled>下載照片 (DOWNLOAD PHOTO)</button>
+        <button id="download-video-btn" class="btn video-btn" disabled>下載影片 (DOWNLOAD VIDEO)</button>
+
+        <div style="margin-top: 12px; width: 100%; position: relative; z-index: 100;">
+          <iframe style="border-radius:12px" src="https://open.spotify.com/embed/album/3ukkRHDHbN8tNRPKsGZR1h?utm_source=generator&theme=0&autoplay=1?autoplay=1" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+        </div>
+      </div>
+
+      <div class="preview-panel">
+        <div id="photo-strip">
+          <div class="photo-layer">
+            <div class="photo-frame"><canvas id="canvas1"></canvas></div>
+            <div class="photo-frame"><canvas id="canvas2"></canvas></div>
+            <div class="photo-frame"><canvas id="canvas3"></canvas></div>
+            <div class="photo-frame"><canvas id="canvas4"></canvas></div>
+          </div>
+
+          <img id="frame-overlay" src="JK_ARIRANG.png" alt="相框">
+          <img id="final-result-img" alt="長按儲存拍貼">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-left-area">
+    <div class="bottom-left-bomb">
+      <img src="炸彈裝飾.png" alt="炸彈裝飾">
+    </div>
+    <div id="bomb-bubble" class="bomb-bubble">방탄 방탄 방방탄!</div>
+  </div>
+
+  <div id="hidden-recorder-container" style="display:none;">
+    <canvas id="video-record-canvas" width="240" height="720"></canvas>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 💣 炸彈白底對話框 3-5 秒隨機跳字邏輯
+      const btsPhrases = [
+        '김남준', '김석진', '민윤기', '정호석', 
+        '박지민', '김태형', '전정국', 'B-T-S', '방탄 방탄 방방탄!'
+      ];
+      const bombBubble = document.getElementById('bomb-bubble');
+
+      function changeBubbleText() {
+        if (bombBubble) {
+          const randomIndex = Math.floor(Math.random() * btsPhrases.length);
+          bombBubble.innerText = btsPhrases[randomIndex];
+        }
+        const randomTime = Math.random() * 2000 + 3000;
+        setTimeout(changeBubbleText, randomTime);
+      }
+      setTimeout(changeBubbleText, 3000);
+
+      const webcam = document.getElementById('webcam');
+      const startBtn = document.getElementById('start-btn');
+      const retakeBtn = document.getElementById('retake-btn');
+      const downloadBtn = document.getElementById('download-btn');
+      const downloadVideoBtn = document.getElementById('download-video-btn');
+      const countdownOverlay = document.getElementById('countdown-overlay');
+      const flashEffect = document.getElementById('flash-effect');
+      const flipBtn = document.getElementById('flip-btn');
+
+      const photoStrip = document.getElementById('photo-strip');
+      const photoLayer = document.querySelector('.photo-layer');
+      const frameOverlay = document.getElementById('frame-overlay');
+      const finalResultImg = document.getElementById('final-result-img');
+      const frameOptions = document.querySelectorAll('.frame-option');
+
+      const videoRecordCanvas = document.getElementById('video-record-canvas');
+      const recordCtx = videoRecordCanvas.getContext('2d');
+
+      let currentFacingMode = 'user'; 
+      let mediaRecorder = null;
+      let recordedChunks = [];
+      let recordedVideoBlob = null;
+      let isRecordingActive = false;
+
+      const FRAME_CONFIGS = {
+        4: {
+          positions: [
+            { left: 18, top: 32, width: 204, height: 141 },
+            { left: 18, top: 178.8, width: 204, height: 141 },
+            { left: 18, top: 325.6, width: 204, height: 141 },
+            { left: 18, top: 472.4, width: 204, height: 141 }
+          ]
+        }
+      };
+
+      let currentSlots = 4;
+      let PHOTO_POSITIONS = FRAME_CONFIGS[4].positions;
+      let canvases = [
+        document.getElementById('canvas1'),
+        document.getElementById('canvas2'),
+        document.getElementById('canvas3'),
+        document.getElementById('canvas4')
+      ];
+
+      function initCamera() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          alert("您的瀏覽器不支援相機功能！");
+          return;
+        }
+
+        if (webcam.srcObject) {
+          webcam.srcObject.getTracks().forEach(track => track.stop());
+        }
+
+        navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            width: { ideal: 1280 }, 
+            height: { ideal: 960 }, 
+            facingMode: currentFacingMode 
+          } 
+        })
+        .then(stream => { 
+          webcam.srcObject = stream;
+          webcam.play().catch(e => console.log(e));
+
+          if (currentFacingMode === 'user') {
+            webcam.classList.remove('rear-camera');
+            webcam.classList.add('front-camera');
+          } else {
+            webcam.classList.remove('front-camera');
+            webcam.classList.add('rear-camera');
+          }
+        })
+        .catch(err => {
+          navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => { 
+              webcam.srcObject = stream;
+              webcam.play().catch(e => console.log(e));
+              if (currentFacingMode === 'user') {
+                webcam.classList.remove('rear-camera');
+                webcam.classList.add('front-camera');
+              } else {
+                webcam.classList.remove('front-camera');
+                webcam.classList.add('rear-camera');
+              }
+            })
+            .catch(e => {
+              alert("無法開啟相機，請確認是否授權相機權限或使用 HTTPS 連線！");
+            });
+        });
+      }
+
+      flipBtn.addEventListener('click', () => {
+        currentFacingMode = (currentFacingMode === 'user') ? 'environment' : 'user';
+        initCamera();
+      });
+
+      initCamera();
+
+      function rebuildPhotoLayer(slots) {
+        photoLayer.innerHTML = '';
+        for (let i = 0; i < slots; i++) {
+          const pos = PHOTO_POSITIONS[i];
+          photoLayer.innerHTML += `<div class="photo-frame" style="top: ${pos.top}px; left: ${pos.left}px; width: ${pos.width}px; height: ${pos.height}px; display: flex;"><canvas id="canvas${i + 1}"></canvas></div>`;
+        }
+        canvases = [];
+        for (let i = 1; i <= slots; i++) {
+          canvases.push(document.getElementById(`canvas${i}`));
+        }
+      }
+
+      let hasShot = false;
+
+      frameOptions.forEach(option => {
+        option.addEventListener('click', (e) => {
+          if (hasShot) return;
+          
+          const activeOld = document.querySelector('.frame-option.active');
+          if (activeOld) activeOld.classList.remove('active');
+          
+          const targetOption = e.currentTarget;
+          targetOption.classList.add('active');
+
+          const selectedFrame = targetOption.getAttribute('data-frame');
+          currentSlots = parseInt(targetOption.getAttribute('data-slots')) || 4;
+          PHOTO_POSITIONS = FRAME_CONFIGS[4].positions;
+
+          rebuildPhotoLayer(currentSlots);
+          startBtn.innerText = `2. 開始拍照 (START)`;
+          frameOverlay.src = `${selectedFrame}.png`;
+        });
+      });
+
+      function renderFrameToContext(ctx, targetWidth, targetHeight, sourceVideoOrCanvas, isLiveVideo, activeFacing) {
+        const vWidth = sourceVideoOrCanvas.videoWidth || sourceVideoOrCanvas.width || 640;
+        const vHeight = sourceVideoOrCanvas.videoHeight || sourceVideoOrCanvas.height || 480;
+        const videoAspect = vWidth / vHeight;
+        const targetAspect = targetWidth / targetHeight;
+
+        let sWidth, sHeight, sx, sy;
+        if (videoAspect > targetAspect) {
+          sHeight = vHeight;
+          sWidth = vHeight * targetAspect;
+          sx = (vWidth - sWidth) / 2;
+          sy = 0;
+        } else {
+          sWidth = vWidth;
+          sHeight = vWidth / targetAspect;
+          sx = 0;
+          sy = (vHeight - sHeight) / 2;
+        }
+
+        ctx.save();
+        if (isLiveVideo && activeFacing === 'user') {
+          ctx.translate(targetWidth, 0);
+          ctx.scale(-1, 1);
+        }
+
+        ctx.drawImage(sourceVideoOrCanvas, sx, sy, sWidth, sHeight, 0, 0, targetWidth, targetHeight);
+        ctx.restore();
+      }
+
+      function takePhoto(canvas) {
+        if (!canvas) return;
+        const targetWidth = canvas.width || 510;
+        const targetHeight = canvas.height || 352;
+        const ctx = canvas.getContext('2d');
+        renderFrameToContext(ctx, targetWidth, targetHeight, webcam, true, currentFacingMode);
+      }
+
+      function renderAllActiveFrames(currentActiveIndex) {
+        recordCtx.clearRect(0, 0, 240, 720);
+
+        PHOTO_POSITIONS.forEach((pos, idx) => {
+          recordCtx.save();
+          recordCtx.beginPath();
+          if (typeof recordCtx.roundRect === 'function') {
+            recordCtx.roundRect(pos.left, pos.top, pos.width, pos.height, 12);
+          } else {
+            recordCtx.rect(pos.left, pos.top, pos.width, pos.height);
+          }
+          recordCtx.clip();
+
+          const sourceToDraw = (idx < currentActiveIndex && canvases[idx] && canvases[idx].width > 0) ? canvases[idx] : webcam;
+          const isLive = !(idx < currentActiveIndex && canvases[idx] && canvases[idx].width > 0);
+
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = pos.width;
+          tempCanvas.height = pos.height;
+          const tempCtx = tempCanvas.getContext('2d');
+          
+          renderFrameToContext(tempCtx, pos.width, pos.height, sourceToDraw, isLive, currentFacingMode);
+          recordCtx.drawImage(tempCanvas, pos.left, pos.top);
+          recordCtx.restore();
+        });
+
+        if (frameOverlay.complete && frameOverlay.naturalWidth !== 0) {
+          recordCtx.drawImage(frameOverlay, 0, 0, 240, 720);
+        }
+      }
+
+      function startRecordingLoop(currentActiveIndex) {
+        if (!isRecordingActive) return;
+        renderAllActiveFrames(currentActiveIndex);
+        requestAnimationFrame(() => startRecordingLoop(currentActiveIndex));
+      }
+
+      function run5SecCountdown(seconds) {
+        return new Promise(resolve => {
+          let count = seconds;
+          countdownOverlay.innerText = count;
+          void countdownOverlay.offsetHeight;
+
+          const timer = setInterval(() => {
+            count--;
+            if (count > 0) {
+              countdownOverlay.innerText = count;
+              void countdownOverlay.offsetHeight;
+            } else {
+              clearInterval(timer);
+              countdownOverlay.innerText = '';
+              resolve();
+            }
+          }, 1000);
+        });
+      }
+
+      async function startPhotography() {
+        startBtn.disabled = true;
+        retakeBtn.disabled = true;
+        downloadBtn.disabled = true;
+        downloadVideoBtn.disabled = true;
+        finalResultImg.style.display = 'none';
+        finalResultImg.classList.remove('printing-animation');
+        hasShot = false;
+        recordedChunks = [];
+
+        rebuildPhotoLayer(currentSlots);
+
+        canvases.forEach((c, idx) => {
+          if (c && PHOTO_POSITIONS[idx]) {
+            c.width = PHOTO_POSITIONS[idx].width * 2;
+            c.height = PHOTO_POSITIONS[idx].height * 2;
+            c.getContext('2d').clearRect(0, 0, c.width, c.height);
+          }
+        });
+
+        if (videoRecordCanvas.captureStream && window.MediaRecorder) {
+          try {
+            const recordStream = videoRecordCanvas.captureStream(30);
+            let options = {};
+            if (MediaRecorder.isTypeSupported('video/mp4')) {
+              options = { mimeType: 'video/mp4' };
+            } else if (MediaRecorder.isTypeSupported('video/webm')) {
+              options = { mimeType: 'video/webm' };
+            }
+
+            mediaRecorder = new MediaRecorder(recordStream, options);
+            mediaRecorder.ondataavailable = (e) => {
+              if (e.data && e.data.size > 0) recordedChunks.push(e.data);
+            };
+            mediaRecorder.start(100);
+            isRecordingActive = true;
+          } catch (e) {
+            console.log("錄影不支援：", e);
+          }
+        }
+
+        for (let i = 0; i < currentSlots; i++) {
+          startRecordingLoop(i);
+          await run5SecCountdown(5);
+          
+          isRecordingActive = false;
+          triggerFlash();
+          takePhoto(canvases[i]); 
+          isRecordingActive = true;
+        }
+
+        isRecordingActive = false;
+        await new Promise(r => setTimeout(r, 1000));
+
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+          mediaRecorder.stop();
+          mediaRecorder.onstop = () => {
+            const mime = mediaRecorder.mimeType || 'video/mp4';
+            recordedVideoBlob = new Blob(recordedChunks, { type: mime });
+            downloadVideoBtn.disabled = false;
+          };
+        }
+
+        hasShot = true;
+        generateFinalImage();
+
+        startBtn.disabled = false;
+        retakeBtn.disabled = false;
+        downloadBtn.disabled = false;
+      }
+
+      function triggerFlash() {
+        flashEffect.classList.add('flash-active');
+        setTimeout(() => {
+          flashEffect.classList.remove('flash-active');
+        }, 120);
+      }
+
+      function generateFinalImage() {
+        html2canvas(photoStrip, { 
+          scale: 2, 
+          useCORS: true,
+          backgroundColor: null
+        }).then(canvas => {
+          const dataUrl = canvas.toDataURL('image/png');
+          finalResultImg.src = dataUrl;
+          finalResultImg.style.display = 'block';
+          finalResultImg.classList.add('printing-animation');
+        }).catch(err => {
+          alert("生成圖片時發生錯誤！");
+        });
+      }
+
+      retakeBtn.addEventListener('click', () => {
+        canvases.forEach(canvas => {
+          if (canvas) {
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+          }
+        });
+        finalResultImg.style.display = 'none';
+        finalResultImg.classList.remove('printing-animation');
+        hasShot = false;
+        downloadBtn.disabled = true;
+        downloadVideoBtn.disabled = true;
+      });
+
+      downloadBtn.addEventListener('click', () => {
+        if (finalResultImg.src && hasShot) {
+          const link = document.createElement('a');
+          link.download = `BTS_Kaohsiung_${Date.now()}.png`;
+          link.href = finalResultImg.src;
+          link.click();
+        }
+      });
+
+      downloadVideoBtn.addEventListener('click', () => {
+        if (recordedVideoBlob) {
+          const url = URL.createObjectURL(recordedVideoBlob);
+          const a = document.createElement('a');
+          const ext = recordedVideoBlob.type.includes('mp4') ? 'mp4' : 'webm';
+          a.href = url;
+          a.download = `BTS_Kaohsiung_video_${Date.now()}.${ext}`;
+          a.click();
+          URL.revokeObjectURL(url);
+        }
+      });
+
+      startBtn.addEventListener('click', startPhotography);
+    });
+  </script>
+</body>
+</html>
