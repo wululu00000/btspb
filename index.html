@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" href="favicon.png">
 
+  <!-- 引入 BTS 風格的現代極簡無襯線字體 Montserrat -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
@@ -370,6 +371,7 @@
       width: 100px;
       height: 100px;
       flex-shrink: 0;
+      transition: transform 0.2s ease;
     }
 
     .bottom-left-bomb img {
@@ -377,6 +379,45 @@
       height: 100%;
       object-fit: contain;
       filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.9));
+    }
+
+    /* 💥 炸彈爆炸震動與放大動畫 */
+    @keyframes bombExplode {
+      0% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.9)); }
+      15% { transform: scale(1.3) rotate(-10deg); filter: drop-shadow(0 0 20px rgba(239, 68, 68, 0.9)); }
+      30% { transform: scale(1.5) rotate(10deg); filter: drop-shadow(0 0 30px rgba(249, 115, 22, 1)); }
+      45% { transform: scale(1.8) rotate(-15deg); filter: drop-shadow(0 0 45px rgba(239, 68, 68, 1)) brightness(1.6); }
+      60% { transform: scale(2.2) rotate(10deg); filter: drop-shadow(0 0 60px white) brightness(2); }
+      100% { transform: scale(2.5); opacity: 0; filter: drop-shadow(0 0 80px white); }
+    }
+
+    .bottom-left-bomb.exploding {
+      animation: bombExplode 0.8s ease-out forwards;
+    }
+
+    /* 💥 爆炸衝擊波圓環 */
+    @keyframes shockwave {
+      0% { transform: scale(0.3); opacity: 1; border-color: #ef4444; }
+      50% { border-color: #f97316; }
+      100% { transform: scale(4); opacity: 0; border-color: #ffffff; }
+    }
+
+    .shockwave-ring {
+      position: fixed;
+      bottom: 45px;
+      left: 45px;
+      width: 60px;
+      height: 60px;
+      border: 5px solid #ef4444;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 99998;
+      display: none;
+    }
+
+    .shockwave-ring.active {
+      display: block;
+      animation: shockwave 0.7s ease-out forwards;
     }
 
     /* 炸彈旁邊的白底對話框 */
@@ -406,6 +447,7 @@
       .bottom-left-area { bottom: 10px; left: 10px; gap: 8px; }
       .bottom-left-bomb { width: 70px; height: 70px; }
       .bomb-bubble { font-size: 10px; padding: 5px 10px; }
+      .shockwave-ring { bottom: 25px; left: 25px; width: 40px; height: 40px; }
     }
   </style>
 </head>
@@ -418,6 +460,7 @@
     <div class="sub-header-title">BTS WORLD TOUR 'ARIRANG' IN KAOHSIUNG</div>
 
     <div class="main-layout">
+      <!-- 左側控制與相機面板 -->
       <div class="controls-panel">
         <div class="camera-container">
           <video id="webcam" autoplay playsinline muted></video>
@@ -452,11 +495,13 @@
         <button id="download-btn" class="btn success" disabled>下載照片 (DOWNLOAD PHOTO)</button>
         <button id="download-video-btn" class="btn video-btn" disabled>下載影片 (DOWNLOAD VIDEO)</button>
 
+        <!-- 🎵 嵌入 Spotify 播放器 -->
         <div style="margin-top: 12px; width: 100%; position: relative; z-index: 100;">
-          <iframe style="border-radius:12px" src="https://open.spotify.com/embed/album/3ukkRHDHbN8tNRPKsGZR1h?utm_source=generator&theme=0&autoplay=1?autoplay=1" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+          <iframe style="border-radius:12px" src="https://open.spotify.com/embed/album/3ukkRHDHbN8tNRPKsGZR1h?utm_source=generator&theme=0&autoplay=1" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
         </div>
       </div>
 
+      <!-- 右側拍貼預覽區 -->
       <div class="preview-panel">
         <div id="photo-strip">
           <div class="photo-layer">
@@ -473,13 +518,16 @@
     </div>
   </div>
 
+  <!-- 💣 左下角裝飾炸彈與對話框、爆炸衝擊波 -->
   <div class="bottom-left-area">
-    <div class="bottom-left-bomb">
+    <div id="bomb-container" class="bottom-left-bomb">
       <img src="炸彈裝飾.png" alt="炸彈裝飾">
     </div>
     <div id="bomb-bubble" class="bomb-bubble">방탄 방탄 방방탄!</div>
   </div>
+  <div id="shockwave" class="shockwave-ring"></div>
 
+  <!-- 隱藏錄影 Canvas -->
   <div id="hidden-recorder-container" style="display:none;">
     <canvas id="video-record-canvas" width="240" height="720"></canvas>
   </div>
@@ -493,6 +541,8 @@
         '박지민', '김태형', '전정국', 'B-T-S', '방탄 방탄 방방탄!'
       ];
       const bombBubble = document.getElementById('bomb-bubble');
+      const bombContainer = document.getElementById('bomb-container');
+      const shockwave = document.getElementById('shockwave');
 
       function changeBubbleText() {
         if (bombBubble) {
@@ -741,6 +791,10 @@
         hasShot = false;
         recordedChunks = [];
 
+        // 拍照開始時重置炸彈狀態
+        bombContainer.classList.remove('exploding');
+        shockwave.classList.remove('active');
+
         rebuildPhotoLayer(currentSlots);
 
         canvases.forEach((c, idx) => {
@@ -795,6 +849,11 @@
         }
 
         hasShot = true;
+        
+        // 💥 拍完照瞬間觸發炸彈爆炸特效
+        bombContainer.classList.add('exploding');
+        shockwave.classList.add('active');
+
         generateFinalImage();
 
         startBtn.disabled = false;
@@ -836,6 +895,10 @@
         hasShot = false;
         downloadBtn.disabled = true;
         downloadVideoBtn.disabled = true;
+
+        // 重新拍照時恢復炸彈
+        bombContainer.classList.remove('exploding');
+        shockwave.classList.remove('active');
       });
 
       downloadBtn.addEventListener('click', () => {
