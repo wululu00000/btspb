@@ -381,18 +381,51 @@
       filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.9));
     }
 
-    /* 💥 炸彈爆炸震動與放大動畫 */
+    /* 🔥 倒數漸進式蠢蠢欲動動畫 */
+    @keyframes shakeLow {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      25% { transform: translate(-2px, 1px) rotate(-2deg); }
+      75% { transform: translate(2px, -1px) rotate(2deg); }
+    }
+
+    @keyframes shakeMed {
+      0%, 100% { transform: translate(0, 0) scale(1.05) rotate(0deg); }
+      20% { transform: translate(-4px, 3px) scale(1.08) rotate(-5deg); filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.8)); }
+      40% { transform: translate(4px, -3px) scale(1.08) rotate(5deg); }
+      60% { transform: translate(-4px, -3px) scale(1.08) rotate(-5deg); }
+      80% { transform: translate(4px, 3px) scale(1.08) rotate(5deg); filter: drop-shadow(0 0 12px rgba(239, 68, 68, 1)); }
+    }
+
+    @keyframes shakeHigh {
+      0%, 100% { transform: translate(0, 0) scale(1.15) rotate(0deg); }
+      15% { transform: translate(-6px, 5px) scale(1.2) rotate(-10deg); filter: drop-shadow(0 0 20px #ef4444) brightness(1.3); }
+      30% { transform: translate(6px, -5px) scale(1.2) rotate(10deg); }
+      45% { transform: translate(-6px, -5px) scale(1.25) rotate(-10deg); }
+      60% { transform: translate(6px, 5px) scale(1.25) rotate(10deg); }
+      75% { transform: translate(-5px, 4px) scale(1.3) rotate(-12deg); filter: drop-shadow(0 0 25px #ff0000) brightness(1.5); }
+      90% { transform: translate(5px, -4px) scale(1.3) rotate(12deg); }
+    }
+
+    .bottom-left-bomb.tension-low {
+      animation: shakeLow 0.8s ease-in-out infinite;
+    }
+    .bottom-left-bomb.tension-med {
+      animation: shakeMed 0.4s ease-in-out infinite;
+    }
+    .bottom-left-bomb.tension-high {
+      animation: shakeHigh 0.18s ease-in-out infinite;
+    }
+
+    /* 💥 最終爆炸動畫 */
     @keyframes bombExplode {
-      0% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.9)); }
-      15% { transform: scale(1.3) rotate(-10deg); filter: drop-shadow(0 0 20px rgba(239, 68, 68, 0.9)); }
-      30% { transform: scale(1.5) rotate(10deg); filter: drop-shadow(0 0 30px rgba(249, 115, 22, 1)); }
-      45% { transform: scale(1.8) rotate(-15deg); filter: drop-shadow(0 0 45px rgba(239, 68, 68, 1)) brightness(1.6); }
-      60% { transform: scale(2.2) rotate(10deg); filter: drop-shadow(0 0 60px white) brightness(2); }
-      100% { transform: scale(2.5); opacity: 0; filter: drop-shadow(0 0 80px white); }
+      0% { transform: scale(1.3) rotate(0deg); filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.9)); }
+      30% { transform: scale(1.8) rotate(15deg); filter: drop-shadow(0 0 45px rgba(239, 68, 68, 1)) brightness(1.6); }
+      60% { transform: scale(2.4) rotate(-15deg); filter: drop-shadow(0 0 60px white) brightness(2); }
+      100% { transform: scale(2.8); opacity: 0; filter: drop-shadow(0 0 80px white); }
     }
 
     .bottom-left-bomb.exploding {
-      animation: bombExplode 0.8s ease-out forwards;
+      animation: bombExplode 0.8s ease-out forwards !important;
     }
 
     /* 💥 爆炸衝擊波圓環 */
@@ -761,20 +794,39 @@
         requestAnimationFrame(() => startRecordingLoop(currentActiveIndex));
       }
 
+      // 💥 根據倒數數字更新炸彈蠢蠢欲動的張力
+      function updateBombTension(count) {
+        bombContainer.classList.remove('tension-low', 'tension-med', 'tension-high');
+        if (count >= 4) {
+          bombContainer.classList.add('tension-low');   // 5、4秒：輕微晃動
+        } else if (count >= 2) {
+          bombContainer.classList.add('tension-med');   // 3、2秒：晃動加快、發紅光
+        } else {
+          bombContainer.classList.add('tension-high');  // 1秒：瘋狂狂抖、蓄勢待發
+        }
+      }
+
+      function clearBombTension() {
+        bombContainer.classList.remove('tension-low', 'tension-med', 'tension-high');
+      }
+
       function run5SecCountdown(seconds) {
         return new Promise(resolve => {
           let count = seconds;
           countdownOverlay.innerText = count;
+          updateBombTension(count);
           void countdownOverlay.offsetHeight;
 
           const timer = setInterval(() => {
             count--;
             if (count > 0) {
               countdownOverlay.innerText = count;
+              updateBombTension(count);
               void countdownOverlay.offsetHeight;
             } else {
               clearInterval(timer);
               countdownOverlay.innerText = '';
+              clearBombTension();
               resolve();
             }
           }, 1000);
@@ -791,9 +843,10 @@
         hasShot = false;
         recordedChunks = [];
 
-        // 拍照開始時重置炸彈狀態
+        // 拍照開始時重置炸彈
         bombContainer.classList.remove('exploding');
         shockwave.classList.remove('active');
+        clearBombTension();
 
         rebuildPhotoLayer(currentSlots);
 
@@ -850,7 +903,7 @@
 
         hasShot = true;
         
-        // 💥 拍完照瞬間觸發炸彈爆炸特效
+        // 💥 四張拍完瞬間觸發炸彈引爆
         bombContainer.classList.add('exploding');
         shockwave.classList.add('active');
 
@@ -896,9 +949,10 @@
         downloadBtn.disabled = true;
         downloadVideoBtn.disabled = true;
 
-        // 重新拍照時恢復炸彈
+        // 重新拍照時重置炸彈
         bombContainer.classList.remove('exploding');
         shockwave.classList.remove('active');
+        clearBombTension();
       });
 
       downloadBtn.addEventListener('click', () => {
