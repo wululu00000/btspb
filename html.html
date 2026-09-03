@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>BTS Online Photo Booth</title>
+  
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="favicon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <button id="music-btn" class="music-toggle-btn">
+      <span id="music-icon">🎵</span> <span id="music-text">BGM</span>
+    </button>
+    
+    <div id="youtube-player-container">
+      <div id="yt-player"></div>
+    </div>
+
+    <div id="hidden-recorder-container">
+      <canvas id="video-record-canvas" width="240" height="720"></canvas>
+    </div>
+
+    <div class="booth-header">
+      <h1 class="exo-title">BTS Online Photo Booth</h1>
+      <div class="spotify-badge">Spotify</div>
+    </div>
+    
+    <div class="sub-header-title">BTS WORLD TOUR 'ARIRANG' IN KAOHSIUNG</div>
+
+    <div class="main-layout">
+      <!-- 左側控制與相機面板 -->
+      <div class="controls-panel">
+        <div class="camera-container">
+          <video id="webcam" autoplay playsinline muted></video>
+          <div id="flash-effect"></div>
+          <div id="countdown-overlay"></div>
+          <button id="flip-btn" class="flip-btn" title="切換前後鏡頭">🔄</button>
+        </div>
+
+        <div class="picker-group">
+          <label>🖼️ 1. 請選擇專屬相框：</label>
+          <div class="options-row">
+            <div class="frame-option active" data-frame="JK_ARIRANG" data-slots="4">
+              <img src="JK_ARIRANG.png" alt="JK Arirang">
+            </div>
+            <div class="frame-option" data-frame="JK_BD" data-slots="4">
+              <img src="JK_BD.png" alt="JK BD">
+            </div>
+            <div class="frame-option" data-frame="RM_ARIRANG" data-slots="4">
+              <img src="RM_ARIRANG.png" alt="RM Arirang">
+            </div>
+            <div class="frame-option" data-frame="RM_BD" data-slots="4">
+              <img src="RM_BD.png" alt="RM BD">
+            </div>
+          </div>
+        </div>
+
+        <div class="buttons">
+          <button id="start-btn" class="btn primary">2. 開始拍照 (START)</button>
+          <button id="retake-btn" class="btn secondary" disabled>重新 (RESHOOT)</button>
+        </div>
+
+        <button id="download-btn" class="btn success" disabled>下載照片 (DOWNLOAD PHOTO)</button>
+        <button id="download-video-btn" class="btn video-btn" disabled>下載影片 (DOWNLOAD VIDEO)</button>
+      </div>
+
+      <!-- 右側拍貼預覽區 -->
+      <div class="preview-panel">
+        <div id="photo-strip">
+          <div class="photo-layer">
+            <div class="photo-frame"><canvas id="canvas1"></canvas></div>
+            <div class="photo-frame"><canvas id="canvas2"></canvas></div>
+            <div class="photo-frame"><canvas id="canvas3"></canvas></div>
+            <div class="photo-frame"><canvas id="canvas4"></canvas></div>
+          </div>
+
+          <img id="frame-overlay" src="JK_ARIRANG.png" alt="相框">
+          <img id="final-result-img" alt="長按儲存拍貼">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 💣 左下角裝飾炸彈 -->
+  <div class="bottom-left-bomb">
+    <img src="左下角炸彈.jpg" alt="炸彈裝飾">
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script src="script.js"></script>
+</body>
+</html>
