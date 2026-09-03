@@ -187,7 +187,7 @@
     }
 
     .flip-btn:hover {
-      background: rgba(56, 189, 248, 0.8);
+      background: rgba(239, 68, 68, 0.8);
       transform: rotate(180deg);
     }
 
@@ -278,9 +278,10 @@
       overflow: hidden;
     }
 
+    /* 相框選取光暈改為紅色 */
     .frame-option.active {
-      border-color: #38bdf8;
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.8);
+      border-color: #ef4444;
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.8);
     }
 
     .frame-option img {
@@ -794,15 +795,14 @@
         requestAnimationFrame(() => startRecordingLoop(currentActiveIndex));
       }
 
-      // 💥 根據倒數數字更新炸彈蠢蠢欲動的張力
       function updateBombTension(count) {
         bombContainer.classList.remove('tension-low', 'tension-med', 'tension-high');
         if (count >= 4) {
-          bombContainer.classList.add('tension-low');   // 5、4秒：輕微晃動
+          bombContainer.classList.add('tension-low');
         } else if (count >= 2) {
-          bombContainer.classList.add('tension-med');   // 3、2秒：晃動加快、發紅光
+          bombContainer.classList.add('tension-med');
         } else {
-          bombContainer.classList.add('tension-high');  // 1秒：瘋狂狂抖、蓄勢待發
+          bombContainer.classList.add('tension-high');
         }
       }
 
@@ -843,7 +843,6 @@
         hasShot = false;
         recordedChunks = [];
 
-        // 拍照開始時重置炸彈
         bombContainer.classList.remove('exploding');
         shockwave.classList.remove('active');
         clearBombTension();
@@ -903,7 +902,6 @@
 
         hasShot = true;
         
-        // 💥 四張拍完瞬間觸發炸彈引爆
         bombContainer.classList.add('exploding');
         shockwave.classList.add('active');
 
@@ -949,7 +947,6 @@
         downloadBtn.disabled = true;
         downloadVideoBtn.disabled = true;
 
-        // 重新拍照時重置炸彈
         bombContainer.classList.remove('exploding');
         shockwave.classList.remove('active');
         clearBombTension();
