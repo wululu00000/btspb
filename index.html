@@ -79,16 +79,6 @@
       text-transform: uppercase;
     }
 
-    .spotify-badge {
-      background-color: #1db954;
-      color: #000;
-      font-family: 'Montserrat', Arial, sans-serif;
-      font-weight: 900;
-      font-size: 11px;
-      padding: 3px 10px;
-      border-radius: 12px;
-    }
-
     /* 第二行標題為紅色 */
     .sub-header-title {
       text-align: center;
@@ -424,7 +414,6 @@
   <div class="container">
     <div class="booth-header">
       <h1 class="booth-title">BTS Online Photo Booth</h1>
-      <div class="spotify-badge">Spotify</div>
     </div>
     
     <div class="sub-header-title">BTS WORLD TOUR 'ARIRANG' IN KAOHSIUNG</div>
@@ -465,9 +454,9 @@
         <button id="download-btn" class="btn success" disabled>下載照片 (DOWNLOAD PHOTO)</button>
         <button id="download-video-btn" class="btn video-btn" disabled>下載影片 (DOWNLOAD VIDEO)</button>
 
-        <!-- 🎵 嵌入指定的 Spotify 專輯音樂播放器 -->
+        <!-- 🎵 嵌入指定的 Spotify 專輯音樂播放器 (加入 autoplay=1 嘗試自動播放) -->
         <div style="margin-top: 12px; width: 100%; position: relative; z-index: 100;">
-          <iframe style="border-radius:12px" src="https://open.spotify.com/embed/album/3ukkRHDHbN8tNRPKsGZR1h?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+          <iframe style="border-radius:12px" src="https://open.spotify.com/embed/album/3ukkRHDHbN8tNRPKsGZR1h?utm_source=generator&theme=0&autoplay=1" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
         </div>
       </div>
 
