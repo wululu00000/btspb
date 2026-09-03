@@ -1,69 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // ==========================================
-  // 🎵 YouTube BGM 背景音樂設定
-  // ==========================================
-  const musicBtn = document.getElementById('music-btn');
-  const musicIcon = document.getElementById('music-icon');
-  const musicText = document.getElementById('music-text');
-
-  let player = null;
-  let isPlaying = false;
-
-  window.onYouTubeIframeAPIReady = function() {
-    try {
-      player = new YT.Player('yt-player', {
-        height: '1',
-        width: '1',
-        playerVars: {
-          'listType': 'playlist',
-          'list': 'PLyJ3pmxrjrzgWkwG52oMsyT41vQcjCfks',
-          'autoplay': 0,
-          'controls': 0,
-          'loop': 1
-        },
-        events: {
-          'onReady': (event) => {
-            event.target.setVolume(40);
-            if (typeof player.setShuffle === 'function') {
-              player.setShuffle(true);
-            }
-          }
-        }
-      });
-    } catch (e) {
-      console.log("YouTube Player 初始化失敗：", e);
-    }
-  };
-
-  function toggleMusic() {
-    if (!player || typeof player.playVideo !== 'function') {
-      alert("背景音樂載入中，請稍候再試一次！");
-      return;
-    }
-
-    if (isPlaying) {
-      player.pauseVideo();
-      musicBtn.classList.remove('playing');
-      musicIcon.innerText = '🔇';
-      musicText.innerText = 'PAUSED';
-      isPlaying = false;
-    } else {
-      if (typeof player.nextVideo === 'function') {
-        player.nextVideo();
-      }
-      player.playVideo();
-      musicBtn.classList.add('playing');
-      musicIcon.innerText = '🔊';
-      musicText.innerText = 'PLAYING';
-      isPlaying = true;
-    }
-  }
-
-  musicBtn.addEventListener('click', toggleMusic);
-
-  // ==========================================
-  // 📸 拍貼機核心程式碼
-  // ==========================================
   const webcam = document.getElementById('webcam');
   const startBtn = document.getElementById('start-btn');
   const retakeBtn = document.getElementById('retake-btn');
@@ -188,13 +123,10 @@ document.addEventListener('DOMContentLoaded', () => {
       targetOption.classList.add('active');
 
       const selectedFrame = targetOption.getAttribute('data-frame');
-      const slots = parseInt(targetOption.getAttribute('data-slots')) || 4;
-
-      currentSlots = slots;
+      currentSlots = parseInt(targetOption.getAttribute('data-slots')) || 4;
       PHOTO_POSITIONS = FRAME_CONFIGS[4].positions;
 
-      rebuildPhotoLayer(slots);
-
+      rebuildPhotoLayer(currentSlots);
       startBtn.innerText = `2. 開始拍照 (START)`;
       frameOverlay.src = `${selectedFrame}.png`;
     });
@@ -295,17 +227,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function startPhotography() {
-    if (player && typeof player.playVideo === 'function' && !isPlaying) {
-      if (typeof player.nextVideo === 'function') {
-        player.nextVideo();
-      }
-      player.playVideo();
-      musicBtn.classList.add('playing');
-      musicIcon.innerText = '🔊';
-      musicText.innerText = 'PLAYING';
-      isPlaying = true;
-    }
-
     startBtn.disabled = true;
     retakeBtn.disabled = true;
     downloadBtn.disabled = true;

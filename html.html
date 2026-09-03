@@ -8,29 +8,12 @@
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" href="favicon.png">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-    <button id="music-btn" class="music-toggle-btn">
-      <span id="music-icon">🎵</span> <span id="music-text">BGM</span>
-    </button>
-    
-    <div id="youtube-player-container">
-      <div id="yt-player"></div>
-    </div>
-
-    <div id="hidden-recorder-container">
-      <canvas id="video-record-canvas" width="240" height="720"></canvas>
-    </div>
-
     <div class="booth-header">
-      <h1 class="exo-title">BTS Online Photo Booth</h1>
+      <h1 class="booth-title">BTS Online Photo Booth</h1>
       <div class="spotify-badge">Spotify</div>
     </div>
     
@@ -95,8 +78,12 @@
     <img src="左下角炸彈.jpg" alt="炸彈裝飾">
   </div>
 
+  <!-- 隱藏錄影 Canvas -->
+  <div id="hidden-recorder-container" style="display:none;">
+    <canvas id="video-record-canvas" width="240" height="720"></canvas>
+  </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://www.youtube.com/iframe_api"></script>
   <script src="script.js"></script>
 </body>
 </html>
