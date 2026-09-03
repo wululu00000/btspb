@@ -8,6 +8,11 @@
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" href="favicon.png">
 
+  <!-- 引入 BTS 風格的現代極簡無襯線字體 Montserrat -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+
   <style>
     * {
       box-sizing: border-box !important;
@@ -23,7 +28,7 @@
       justify-content: center;
       align-items: center;
       padding: 15px;
-      font-family: Arial, sans-serif;
+      font-family: 'Montserrat', Arial, sans-serif;
       position: relative;
       margin: 0;
     }
@@ -41,10 +46,11 @@
       z-index: -999;
     }
 
+    /* 拍貼框主容器：改成 50% 透明度黑色 */
     .container {
       position: relative;
       z-index: 10;
-      background: rgba(18, 20, 28, 0.95);
+      background: rgba(0, 0, 0, 0.5);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       padding: 20px;
@@ -65,10 +71,10 @@
     }
 
     .booth-title {
-      font-family: Arial, Helvetica, sans-serif;
+      font-family: 'Montserrat', Arial, sans-serif;
       font-weight: 800;
       font-size: 18px;
-      letter-spacing: 0.5px;
+      letter-spacing: 1px;
       color: #ffffff;
       text-transform: uppercase;
     }
@@ -76,7 +82,7 @@
     .spotify-badge {
       background-color: #1db954;
       color: #000;
-      font-family: Arial, Helvetica, sans-serif;
+      font-family: 'Montserrat', Arial, sans-serif;
       font-weight: 900;
       font-size: 11px;
       padding: 3px 10px;
@@ -85,12 +91,12 @@
 
     .sub-header-title {
       text-align: center;
-      font-family: Arial, Helvetica, sans-serif;
+      font-family: 'Montserrat', Arial, sans-serif;
       font-size: 13px;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
       color: #38bdf8;
       margin-bottom: 15px;
-      font-weight: bold;
+      font-weight: 800;
     }
 
     .main-layout {
@@ -358,7 +364,7 @@
       100% { transform: translateY(0); opacity: 1; filter: brightness(1) contrast(1); }
     }
 
-    /* 左下角炸彈樣式與高層級修正 */
+    /* 左下角炸彈樣式 */
     .bottom-left-bomb {
       position: fixed;
       bottom: 20px;
@@ -449,7 +455,7 @@
 
   <!-- 💣 左下角裝飾炸彈 -->
   <div class="bottom-left-bomb">
-    <img src="左下角炸彈.jpg" alt="炸彈裝飾">
+    <img src="炸彈裝飾.png" alt="炸彈裝飾">
   </div>
 
   <!-- 隱藏錄影 Canvas -->
