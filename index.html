@@ -365,15 +365,22 @@
       100% { transform: translateY(0); opacity: 1; filter: brightness(1) contrast(1); }
     }
 
-    /* 左下角炸彈樣式 */
-    .bottom-left-bomb {
+    /* 左下角炸彈與對話框區域 */
+    .bottom-left-area {
       position: fixed;
       bottom: 20px;
       left: 20px;
+      z-index: 99999;
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      pointer-events: none;
+    }
+
+    .bottom-left-bomb {
       width: 100px;
       height: 100px;
-      z-index: 99999;
-      pointer-events: none;
+      flex-shrink: 0;
     }
 
     .bottom-left-bomb img {
@@ -383,11 +390,33 @@
       filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.9));
     }
 
+    /* 炸彈旁邊的白底對話框 */
+    .bomb-bubble {
+      background: #ffffff;
+      color: #111111;
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-family: 'Montserrat', Arial, sans-serif;
+      font-weight: 800;
+      font-size: 13px;
+      white-space: nowrap;
+      border: 2px solid #111111;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      animation: bubblePulse 2.5s ease-in-out infinite;
+    }
+
+    @keyframes bubblePulse {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
     @media (max-width: 650px) {
       .main-layout { flex-direction: column; align-items: center; }
       .container { width: 100%; padding: 12px; }
       .controls-panel { width: 100%; }
-      .bottom-left-bomb { bottom: 10px; left: 10px; width: 70px; height: 70px; }
+      .bottom-left-area { bottom: 10px; left: 10px; gap: 8px; }
+      .bottom-left-bomb { width: 70px; height: 70px; }
+      .bomb-bubble { font-size: 10px; padding: 5px 10px; }
     }
   </style>
 </head>
@@ -454,9 +483,12 @@
     </div>
   </div>
 
-  <!-- 💣 左下角裝飾炸彈 -->
-  <div class="bottom-left-bomb">
-    <img src="炸彈裝飾.png" alt="炸彈裝飾">
+  <!-- 💣 左下角裝飾炸彈與隨機跳字白底框 -->
+  <div class="bottom-left-area">
+    <div class="bottom-left-bomb">
+      <img src="炸彈裝飾.png" alt="炸彈裝飾">
+    </div>
+    <div id="bomb-bubble" class="bomb-bubble">방탄 방탄 방방탄!</div>
   </div>
 
   <!-- 隱藏錄影 Canvas -->
@@ -467,6 +499,24 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      // 💣 炸彈白底對話框 3-5 秒隨機跳字邏輯
+      const btsPhrases = [
+        '김남준', '김석진', '민윤기', '정호석', 
+        '박지민', '김태형', '전정국', 'B-T-S', '방탄 방탄 방방탄!'
+      ];
+      const bombBubble = document.getElementById('bomb-bubble');
+
+      function changeBubbleText() {
+        if (bombBubble) {
+          const randomIndex = Math.floor(Math.random() * btsPhrases.length);
+          bombBubble.innerText = btsPhrases[randomIndex];
+        }
+        // 隨機 3000ms 到 5000ms (3-5秒) 之間切換
+        const randomTime = Math.random() * 2000 + 3000;
+        setTimeout(changeBubbleText, randomTime);
+      }
+      setTimeout(changeBubbleText, 3000);
+
       const webcam = document.getElementById('webcam');
       const startBtn = document.getElementById('start-btn');
       const retakeBtn = document.getElementById('retake-btn');
