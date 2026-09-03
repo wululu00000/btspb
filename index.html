@@ -28,7 +28,7 @@
       margin: 0;
     }
 
-    /* 專門用來解決手機版與各瀏覽器背景圖片失效問題 */
+    /* 手機與電腦皆可完美顯示背景的寫法 */
     body::before {
       content: "";
       position: fixed;
@@ -43,7 +43,7 @@
 
     .container {
       position: relative;
-      z-index: 1;
+      z-index: 10;
       background: rgba(18, 20, 28, 0.95);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
@@ -159,14 +159,15 @@
       opacity: 0.95;
     }
 
+    /* 倒數計時數字改為紅色 */
     #countdown-overlay {
       position: absolute;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       font-size: 70px;
       font-weight: 900;
-      color: #38bdf8;
-      text-shadow: 0 0 25px rgba(0, 0, 0, 0.9), 0 0 10px rgba(56, 189, 248, 0.8);
+      color: #ef4444;
+      text-shadow: 0 0 25px rgba(0, 0, 0, 0.9), 0 0 10px rgba(239, 68, 68, 0.8);
       z-index: 999;
     }
 
@@ -357,13 +358,14 @@
       100% { transform: translateY(0); opacity: 1; filter: brightness(1) contrast(1); }
     }
 
+    /* 左下角炸彈樣式與高層級修正 */
     .bottom-left-bomb {
       position: fixed;
       bottom: 20px;
       left: 20px;
       width: 100px;
       height: 100px;
-      z-index: 9998;
+      z-index: 99999;
       pointer-events: none;
     }
 
@@ -371,7 +373,7 @@
       width: 100%;
       height: 100%;
       object-fit: contain;
-      filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.8));
+      filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.9));
     }
 
     @media (max-width: 650px) {
